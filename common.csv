@@ -1,0 +1,5 @@
+Question,Keyword,Command
+"What time is it","time","python common.py date_time"
+"What day is today","today","python common.py today"
+"How are you","how are you","python common.py how_are_you"
+"Goodbye","Bye","python common.py good_bye"
