@@ -46,14 +46,14 @@ while True:
         print("Robot: I'm Listening", end='', flush=True)
         audio = robot_ear.listen(mic)    
     print("Robot:...") 
-    '''
+   
     try:
         you = robot_ear.recognize_google_cloud(audio)
         print("User: " + you)
     except:
         you = ""
-'''
-    you = "how to learn java"
+
+    #you = "how to learn java"
     data = pd.read_csv('common.csv')
     keyword = data[data['Keyword'].apply(lambda x: x.lower() in you)]
     print("You: "+you)
