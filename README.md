@@ -1,7 +1,8 @@
 # simple-chatbot
-A simple chatbot with Llama 7B model
+A simple voice chatbot with Llama 7B model
 1. References
-   - https://github.com/conanak99/sample-gpt-local/tree/master
+   - Llama_cpp and chatgpt local:  https://github.com/conanak99/sample-gpt-local/tree/master
+   - Voice chatbot: https://github.com/nguyen-tho/python-chatbot
 2. How to use
 
    Setup environment by virtual environment (virtualenv or venv)
