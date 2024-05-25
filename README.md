@@ -25,3 +25,6 @@ A simple chatbot with Llama_cpp library and Mistral 7B Open Orca model
    python app.py
    ```
 
+3. Contact:
+
+    Please contact with me at this email address to discuss: nguyencongtho116@gmail.com
