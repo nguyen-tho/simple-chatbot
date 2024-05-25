@@ -1,5 +1,5 @@
 # simple-chatbot
-A simple voice chatbot with Llama 7B model
+A simple chatbot with Llama_cpp library and Mistral 7B Open Orca model
 1. References
    - Llama_cpp and chatgpt local:  https://github.com/conanak99/sample-gpt-local/tree/master
    - Voice chatbot: https://github.com/nguyen-tho/python-chatbot
