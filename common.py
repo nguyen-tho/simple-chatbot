@@ -11,6 +11,20 @@ def how_are_you():
     return  "I am doing well, thank you for asking."
 def good_bye():
     return "Good bye! It was nice talking to you!"
+def greeting():
+    current_time = datetime.datetime.now()
+    hour = current_time.hour
+
+    if hour < 12:
+        return "Good morning"
+    elif hour < 18:
+        return "Good afternoon"
+    elif hour < 20:
+        return "Good evening"
+    else:
+        return "Good night"
+
+
 if __name__ == "__main__":
     import sys
 
@@ -27,5 +41,7 @@ if __name__ == "__main__":
         print(how_are_you())
     elif function_name ==  "good_bye":
         print(good_bye())
-    else:
+   elif function_name == 'greeting':
+        print(greeting())
+   else:
         print("It is not included in the list")
