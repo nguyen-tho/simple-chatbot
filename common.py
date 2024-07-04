@@ -11,7 +11,6 @@ def how_are_you():
     return  "I am doing well, thank you for asking."
 def good_bye():
     return "Good bye! It was nice talking to you!"
-
 if __name__ == "__main__":
     import sys
 
@@ -29,4 +28,4 @@ if __name__ == "__main__":
     elif function_name ==  "good_bye":
         print(good_bye())
     else:
-        print("Invalid function name")
+        print("It is not included in the list")
