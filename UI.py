@@ -28,42 +28,32 @@ class LlamaChatUI:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Quit", command=self.quit)
 
-        self.prompt_label = tk.Label(root, text="Enter your prompt:")
-        self.prompt_label.pack()
-
-        self.prompt_entry = tk.Entry(root, width=100)
-        self.prompt_entry.pack()
-
+        
         self.answer_label = tk.Label(root, text="System's answer:")
-        self.answer_label.pack()
+        self.answer_label.grid(row=0, column=0, padx=10, pady=10)
+        self.answer_value = tk.Text(root, height=200, width=100)
+        self.answer_value.grid(row=0, column=1,padx=10, pady=10)
+        
+        self.prompt_label = tk.Label(root, text="Enter your prompt:")
+        self.prompt_label.grid(row=1, column=0, padx=10, pady=10)
+        self.prompt_entry = tk.Entry(root, width=100)
+        self.prompt_entry.grid(row=1, column=1, padx=10, pady=10)
+        self.prompt_btn = tk.Button(root, text='Enter', command=self.ask_question)
+        self.prompt_btn.grid(row=1, column=2, padx=10, pady=10)
+        
 
         # Add frame for output text and scrollbar
-        self.text_frame = tk.Frame(root)
-        self.text_frame.pack()
-
-        self.output_text = tk.Text(self.text_frame, height=20, width=100, wrap=tk.WORD)
-        self.output_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        self.scrollbar = tk.Scrollbar(self.text_frame, command=self.output_text.yview)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        self.output_text.config(yscrollcommand=self.scrollbar.set)
-
-        self.ask_button = tk.Button(root, text="Ask", command=self.ask_question)
-        self.ask_button.pack()
-
-        self.quit_button = tk.Button(root, text="Quit", command=self.quit)
-        self.quit_button.pack()
+        
 
     def ask_question(self):
         prompt = self.prompt_entry.get()
-        try:
-            self.output_text.insert(tk.END, f"User: {prompt}\n")
+        self.answer_value.insert(tk.END, f"User: {prompt}\n")
+        try:   
             output = llama_chat(prompt)
             answer_text = ''.join([token["choices"][0]["text"] for token in output])
-            self.output_text.insert(tk.END, f"System: {answer_text}\n")
+            self.answer_value.insert(tk.END, f"System: {answer_text}\n")
         except Exception as e:
-            self.output_text.insert(tk.END, f"Error occurred: {e}\n")
+            self.answer_value.insert(tk.END, f"Error occurred: {e}\n")
 
     def save_conversation(self, event=None):
         try:

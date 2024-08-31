@@ -4,8 +4,8 @@ from llama_cpp import Llama
 # https://github.com/abetlen/llama-cpp-python
 def llama_chat(prompt):
  
-    llm = Llama(model_path="./models/mistral-7b-openorca.Q4_0.gguf",main_gpu=0,
-            n_gpu_layers=40, n_ctx=4096)
+    llm = Llama(model_path="models\mistral-7b-openorca.Q4_0.gguf",main_gpu=0,
+            n_gpu_layers=40, n_ctx=512)
     out = llm.create_completion(f"""<|im_start|>system
     You are a helpful chatbot.
     <|im_end|>
