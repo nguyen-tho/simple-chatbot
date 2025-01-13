@@ -21,11 +21,15 @@ A simple chatbot with Llama_cpp library and Mistral 7B Open Orca model
    ```sh
    pip install -r requirements.txt
    ```
+   create your Gemini API key and copy it to this file:
+   ```sh
+   key.txt
+   ```
    Run program by app.py
    ```sh
    python app.py
    ```
 
-3. Contact:
+4. Contact:
 
     Please contact with me at this email address to discuss: nguyencongtho116@gmail.com
