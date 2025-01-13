@@ -2,10 +2,15 @@ from llama_cpp import Llama
 
 # conda activate llama
 # https://github.com/abetlen/llama-cpp-python
+def get_llama_model(model_name = "models\mistral-7b-openorca.Q4_0.gguf"):
+    # Load the LLaMA model
+    model = Llama(model_path= model_name,main_gpu=0,
+            n_gpu_layers=40, n_ctx=512)
+    return model
+
 def llama_chat(prompt):
  
-    llm = Llama(model_path="models\mistral-7b-openorca.Q4_0.gguf",main_gpu=0,
-            n_gpu_layers=40, n_ctx=512)
+    llm = get_llama_model()
     out = llm.create_completion(f"""<|im_start|>system
     You are a helpful chatbot.
     <|im_end|>

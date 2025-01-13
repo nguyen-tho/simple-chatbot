@@ -2,9 +2,9 @@ import speech_recognition
 import pyttsx3
 #import gtts
 import os
-
+import google_api as api
 from subprocess import PIPE, Popen
-import index_cpp
+import index_cpp as llama
 import subprocess
 import pandas as pd
     
@@ -32,12 +32,22 @@ def common_question(question):
         process = Popen(command, stdout=PIPE, stderr=None, shell=True)
         output = process.communicate()[0]
         return str(output.decode("utf-8").strip())
-
+    
 def robot_answer(robot_brain):
     print("Robot:" + robot_brain, end='', flush=True)
     robot_mouth.say(robot_brain)
     robot_mouth.runAndWait()
     return
+
+def choose_mode(mode = 'offine'):
+    model = None
+    if mode == 'online':
+        key = api.get_api_key()
+        model = api.call_api(key)
+    else:
+        model = llama.get_llama_model()
+        
+    return model
 
 while True: 
     robot_mouth.say("I'm Listening")
@@ -68,7 +78,16 @@ while True:
             if "bye" in you:
                 break
         else:
-            chat_response = index_cpp.llama_chat(you)
-            robot_brain = index_cpp.send_response(chat_response)
+            mode = input('Choose mode')
+            model = choose_mode(mode)
+            if mode == 'online':
+                robot_brain = api.generate_response(model, you)
+            else: 
+                robot_brain = llama.llama_chat(you)
+                
             robot_answer(robot_brain)
-        
+                
+
+
+
+         
