@@ -7,6 +7,7 @@ from subprocess import PIPE, Popen
 import index_cpp as llama
 import subprocess
 import pandas as pd
+import time
     
 robot_ear = speech_recognition.Recognizer()
 robot_mouth = pyttsx3.init()
@@ -33,27 +34,45 @@ def common_question(question):
         output = process.communicate()[0]
         return str(output.decode("utf-8").strip())
     
-def robot_answer(robot_brain):
+def robot_speak(robot_brain):
     print("Robot:" + robot_brain, end='', flush=True)
     robot_mouth.say(robot_brain)
     robot_mouth.runAndWait()
     return
 
-def choose_mode(mode = 'offine'):
-    model = None
-    if mode == 'online':
+def generate_response(prompt):
+    mode = input('Choose mode: ')
+    response = 'OK, Please wait ...\n'
+    robot_speak(response)
+    if mode == 'online' or mode == 'on':
         key = api.get_api_key()
         model = api.call_api(key)
-    else:
-        model = llama.get_llama_model()
+        response = api.generate_response(model, prompt)
         
-    return model
+    elif mode == 'offline' or mode == 'off':
+        model = llama.get_llama_model()
+        output = llama.llama_chat(prompt)
+        response = llama.send_response(output)
+    else:
+        response = 'Invalid mode. Please choose online or offline mode.\n'
+    
+    robot_speak(response)
+        
+def robot_response(you):
+    data = pd.read_csv('common.csv')
+    keyword = data[data['Keyword'].apply(lambda x: x.lower() in you)]
 
+    if not keyword.empty:# response common question in dataset
+        robot_brain = common_question(you)
+        robot_speak(robot_brain)
+    else:# response by LLM model
+        generate_response(you) 
+ 
 while True: 
     robot_mouth.say("I'm Listening")
     robot_mouth.runAndWait()
     with speech_recognition.Microphone() as mic:
-        print("Robot: I'm Listening", end='', flush=True)
+        print("Robot: I'm Listening\n", end='', flush=True)
         audio = robot_ear.listen(mic)    
     print("Robot:...") 
    
@@ -64,30 +83,21 @@ while True:
         you = ""
 
     #you = "how to learn java"
-    data = pd.read_csv('common.csv')
-    keyword = data[data['Keyword'].apply(lambda x: x.lower() in you)]
     print("You: "+you)
-    if you == "":
-        robot_brain = "I can't hear you, try again"
-        robot_answer(robot_brain)
-    
-    else:
-        if not keyword.empty:
-            robot_brain = common_question(you)
-            robot_answer(robot_brain)
-            if "bye" in you:
-                break
+    attempt_count = 0
+    while attempt_count < 3:
+        if you == "":
+            if attempt_count < 2:
+                robot_brain = "I can't hear you, try again.\n"
+                robot_speak(robot_brain)
+                attempt_count += 1
+                time.sleep(3) # wait for 3 seconds
+            else:
+                robot_speak("I can't seem to understand your input. Please type your question.\n")
+                you = input("Type your question: ")
         else:
-            mode = input('Choose mode')
-            model = choose_mode(mode)
-            if mode == 'online':
-                robot_brain = api.generate_response(model, you)
-            else: 
-                robot_brain = llama.llama_chat(you)
-                
-            robot_answer(robot_brain)
-                
-
-
-
-         
+            robot_response(you)
+            if 'bye' in you:
+                break
+            
+                       
