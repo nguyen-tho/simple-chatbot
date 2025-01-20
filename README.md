@@ -1,5 +1,8 @@
 # simple-chatbot
 A simple chatbot with Llama_cpp library and Mistral 7B Open Orca model
+New update for this voice chatbot:
+- Offline mode is Mistral 7B Open Orca model + Llama_cpp
+- Online mode is Google Gemini API
 1. References
    - Llama_cpp and chatgpt local:  https://github.com/conanak99/sample-gpt-local/tree/master
    - Voice chatbot: https://github.com/nguyen-tho/python-chatbot
