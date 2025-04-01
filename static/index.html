@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Chatbot</title>
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+
+<div id="settings-container">
+    <div>
+        <label for="mode-toggle">Online Mode:</label>
+        <label class="switch">
+            <input type="checkbox" id="mode-toggle" checked>
+            <span class="slider round"></span>
+          </label>
+    </div>
+    <div>
+        <label for="model-select">Model:</label>
+        <select id="model-select">
+            <option value="model1">Model 1</option>
+            <option value="model2">Model 2</option>
+            <option value="model3">Model 3</option>
+        </select>
+    </div>
+</div>
+
+<div id="content-container">
+    <div id="history-container">
+        <h2>History</h2>
+        <button id="new-chat-button">New Chat</button>
+    </div>
+
+    <div id="chat-container">
+    </div>
+</div>
+
+<div id="input-container">
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+</div>
+
+<script src="/static/scripts.js"></script>
+</body>
+</html>
