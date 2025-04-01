@@ -33,7 +33,9 @@ New update for this voice chatbot:
    ```sh
    python app.py
    ```
-
+3. New update
+   - Build an API using Fast API (in process)
+   - Build a simple web UI using HTML, CSS, and JS  
 4. Contact:
 
     Please contact with me at this email address to discuss: nguyencongtho116@gmail.com
