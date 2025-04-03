@@ -77,6 +77,12 @@ body {
   margin-right: 10px;
 }
 
+#message-input::-webkit-input-placeholder { /* For Chrome, Safari, and Opera */
+  color: #999;
+  font-style: italic;
+}
+
+
 #send-button {
   padding: 8px 15px;
   background-color: #4CAF50;

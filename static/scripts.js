@@ -137,6 +137,38 @@ setTimeout(() => {
 newChatButton.addEventListener('click', newChat);
 */// scripts.js
 // scripts.js
+const historyContainer = document.getElementById('history-container');
+const chatContainer = document.getElementById('chat-container');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const newChatButton = document.getElementById('new-chat-button');
+const modeToggle = document.getElementById('mode-toggle');
+const modelSelect = document.getElementById('model-select');
+
+let conversationHistory = [];
+let currentConversation = [];
+let onlineMode = true;
+let selectedModel = 'model1';
+let isNewChat = true; // Flag to track if it's a new chat
+
+modeToggle.addEventListener('change', () => {
+    onlineMode = modeToggle.checked;
+});
+
+modelSelect.addEventListener('change', () => {
+    selectedModel = modelSelect.value;
+});
+
+function addMessage(message, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', `${sender}-message`);
+    messageDiv.textContent = message;
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    currentConversation.push({ sender, message });
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
@@ -144,14 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeToggle = document.getElementById('mode-toggle');
     const modelSelect = document.getElementById('model-select');
     const newChatButton = document.getElementById('new-chat-button');
-
+    /*
     function appendMessage(sender, message) {
         const messageDiv = document.createElement('div');
         messageDiv.textContent = `${sender}: ${message}`;
         chatContainer.appendChild(messageDiv);
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
+    */
     async function loadModels() {
         try {
             const response = await fetch('/models');
@@ -183,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton.addEventListener('click', async () => {
         const message = messageInput.value;
         if (message) {
-            appendMessage('You', message);
+            addMessage(message, 'user');
             messageInput.value = '';
 
             const mode = modeToggle.checked ? 'online' : 'offline';
@@ -200,17 +232,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    appendMessage('Robot', data.response);
+                    const answer = data.response;
+                    if (answer) {
+                        addMessage(answer, 'bot');
+                    } else {
+                        addMessage('Error: No answer received.', 'bot');
+                    }
                 } else {
-                    appendMessage('Robot', 'Error: Could not get response.');
+                    addMessage('Error: Could not get response.', 'bot');
                 }
+                saveConversation(); // Save the conversation when the page loads
             } catch (error) {
-                appendMessage('Robot', 'Error: ' + error.message);
+                addMessage('Error: ' + error.message, 'bot');
             }
         }
-    });
+        
+    });  
+}
+);
+function saveConversation() {
+    if (currentConversation.length > 0 && isNewChat) { // Only save if it's a new chat
+        conversationHistory.push(currentConversation);
+        updateHistoryDisplay();
+        isNewChat = false; // Reset the flag
+    }
+}
 
-    newChatButton.addEventListener('click', () => {
-        chatContainer.innerHTML = '';
+function updateHistoryDisplay() {
+    historyContainer.innerHTML = '<h2>History</h2><button id="new-chat-button">New Chat</button>';
+    document.getElementById('new-chat-button').addEventListener('click', newChat);
+    conversationHistory.forEach((conversation, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.classList.add('history-item');
+        historyItem.innerHTML = `<span>Conversation ${index + 1}</span><button class="delete-button" data-index="${index}">X</button>`;
+        historyItem.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-button')) {
+                return;
+            }
+            loadConversation(index);
+        });
+        historyContainer.appendChild(historyItem);
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const indexToDelete = parseInt(event.target.dataset.index);
+                deleteConversation(indexToDelete);
+            });
+        });
     });
+}
+
+function loadConversation(index) {
+    chatContainer.innerHTML = ''; // Clear the chat
+    currentConversation = conversationHistory[index].slice(); // Copy the conversation
+    conversationHistory[index].forEach(messageObj => {
+        addMessage(messageObj.message, messageObj.sender);
+    });
+    isNewChat = false; // It's not a new chat when loading a conversation
+}
+
+function deleteConversation(index) {
+    conversationHistory.splice(index, 1);
+    updateHistoryDisplay();
+    chatContainer.innerHTML = '';
+    currentConversation = [];
+    isNewChat = true; // Start a new chat after deleting
+}
+
+function newChat() {
+    chatContainer.innerHTML = '';
+    currentConversation = [];
+    addMessage("Hello! How can I help you?", "bot");
+    isNewChat = true; // It's a new chat
+}
+/*
+sendButton.addEventListener('click', () => {
+    const message = messageInput.value.trim();
+    if (message) {
+        addMessage(message, 'user');
+        messageInput.value = '';
+
+        setTimeout(() => {
+            const botResponse = getBotResponse(message);
+            addMessage(botResponse, 'bot');
+            saveConversation();
+        }, 500);
+    }
 });
+*/
+messageInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        sendButton.click();
+    }
+});
+
+setTimeout(() => {
+    addMessage("Hello! How can I help you?", "bot");
+}, 200);
+
+newChatButton.addEventListener('click', newChat);
