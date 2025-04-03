@@ -25,8 +25,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class QuestionRequest(BaseModel):
     question: str
-    mode: str = "online"
-    model: str = "gemini-1.5-flash"
+    mode: str  
+    model: str 
 
 def load_models(model_data_file="api_key.json"):
     try:
@@ -109,7 +109,7 @@ def generate_response(prompt, mode, model):
             response = "Invalid offline model selected."
     else:
         response = 'Invalid mode. Please choose online or offline mode.\n'
-    robot_speak(response)
+    # robot_speak(response)
     return response
 
 def robot_response(you, mode, model):
@@ -119,7 +119,7 @@ def robot_response(you, mode, model):
     if not keyword.empty:
         robot_brain = common_question(you)
         if robot_brain is not None:
-            robot_speak(robot_brain)
+            #robot_speak(robot_brain)
             return robot_brain
         else:
             return generate_response(you, mode, model)
@@ -133,7 +133,7 @@ async def ask_question(request: QuestionRequest):
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+"""
 @app.post("/speak/")
 async def speak_question(request: QuestionRequest):
     try:
@@ -153,7 +153,7 @@ async def speak_question(request: QuestionRequest):
         return {"response": f"Could not request results from Google Cloud Speech Recognition service; {e}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+"""
 @app.get("/models")
 async def get_models():
     return JSONResponse({"online_models": online_models, "offline_models": offline_models})
