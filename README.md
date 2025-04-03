@@ -29,13 +29,20 @@ New update for this voice chatbot:
    ```sh
    key.txt
    ```
-   Run program by app.py
+   Run program by terminal_app.py
    ```sh
+   #run the simple chatbot on your terminal
+   python terminal_app.py
+   ```
+   Run API
+   ```sh
+   #the API can run with localhost (127.0.0.1:80)
+   #run app.py to run API
    python app.py
    ```
-3. New update
+4. New update
    - Build an API using Fast API (in process)
    - Build a simple web UI using HTML, CSS, and JS  
-4. Contact:
+5. Contact:
 
     Please contact with me at this email address to discuss: nguyencongtho116@gmail.com
