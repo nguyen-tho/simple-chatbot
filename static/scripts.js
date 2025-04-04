@@ -147,18 +147,67 @@ const modelSelect = document.getElementById('model-select');
 
 let conversationHistory = [];
 let currentConversation = [];
-let onlineMode = true;
-let selectedModel = 'model1';
+let onlineMode = false;
+let selectedModel = modelSelect.value;
 let isNewChat = true; // Flag to track if it's a new chat
 
-modeToggle.addEventListener('change', () => {
-    onlineMode = modeToggle.checked;
+async function checkInternetConnection() {
+    try {
+        const response = await fetch('https://1.1.1.1/cdn-cgi/trace', {
+            method: 'HEAD',
+            cache: 'no-store',
+        });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+modeToggle.addEventListener('change', async () => {
+    if (modeToggle.checked) {
+        const isConnected = await checkInternetConnection();
+        if (isConnected) {
+            onlineMode = true;
+            console.log('Online mode enabled.');
+        } else {
+            modeToggle.checked = false;
+            alert('Internet connection is required for online mode.');
+        }
+    } else {
+        onlineMode = false;
+        console.log('Offline mode enabled.');
+    }
 });
 
 modelSelect.addEventListener('change', () => {
     selectedModel = modelSelect.value;
+    console.log('Selected model:', selectedModel);
 });
 
+checkInternetConnection().then((isConnected) => {
+    if (!isConnected && modeToggle.checked) {
+        modeToggle.checked = false;
+        alert('Internet connection lost. Online mode disabled.');
+    }
+});
+
+window.addEventListener('online', (event) => {
+    console.log('You are now online.');
+    //If the toggle is already on, or if the toggle is off, but the user is trying to turn it on, do not alert.
+    if (!modeToggle.checked) {
+        alert('Internet connection restored. Online mode available.');
+    }
+});
+
+window.addEventListener('offline', (event) => {
+    console.log('You are now offline.');
+    if (modeToggle.checked) {
+        modeToggle.checked = false;
+        alert('Internet connection lost. Online mode disabled.');
+    }
+});
+
+/*
 function addMessage(message, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
@@ -167,7 +216,7 @@ function addMessage(message, sender) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
     currentConversation.push({ sender, message });
 }
-
+*/
 
 document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
@@ -246,8 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 addMessage('Error: ' + error.message, 'bot');
             }
         }
-        
-    });  
+
+    });
 }
 );
 function saveConversation() {
@@ -331,3 +380,32 @@ setTimeout(() => {
 }, 200);
 
 newChatButton.addEventListener('click', newChat);
+
+function addMessage(message, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', `${sender}-message`);
+
+    // Check if marked is available
+    if (typeof marked === 'undefined') {
+        console.error("marked.js is not loaded. Please include it in your HTML.");
+        messageDiv.textContent = message; // Fallback to plain text
+    } else {
+        messageDiv.innerHTML = marked.parse(message); // Render Markdown
+    }
+
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    currentConversation.push({ sender, message });
+}
+
+// Ensure marked.js is loaded (if not already)
+function ensureMarkedLoaded() {
+    if (typeof marked === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+        document.head.appendChild(script);
+    }
+}
+
+// Call ensureMarkedLoaded somewhere before addMessage is used.
+ensureMarkedLoaded();
