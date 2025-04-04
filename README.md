@@ -25,9 +25,18 @@ New update for this voice chatbot:
    ```sh
    pip install -r requirements.txt
    ```
-   create your Gemini API key and copy it to this file:
+   create your Gemini API key and copy it to api.json at model Gemini:
    ```sh
-   key.txt
+   # api_key.json
+   {
+    "online_model":
+    [
+        {
+            "model": "gemini-1.5-flash",
+            "name": "Gemini 1.5 Flash",
+            "api_key": "" //your api key
+
+        },
    ```
    Run program by terminal_app.py
    ```sh
