@@ -59,6 +59,8 @@ body {
 .bot-message {
   background-color: #e8e8e8;
   align-self: flex-start;
+  width: 100%; /* Make it full width */
+  box-sizing: border-box; /* Include padding and border in the width */
 }
 
 #input-container {

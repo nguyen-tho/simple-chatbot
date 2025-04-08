@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ import time
 import json
 from pathlib import Path
 import uvicorn
-
+import os
 app = FastAPI()
 
 robot_ear = speech_recognition.Recognizer()
@@ -27,6 +27,7 @@ class QuestionRequest(BaseModel):
     question: str
     mode: str  
     model: str 
+    
 
 def load_models(model_data_file="api_key.json"):
     try:
@@ -109,7 +110,7 @@ def generate_response(prompt, mode, model):
             response = "Invalid offline model selected."
     else:
         response = 'Invalid mode. Please choose online or offline mode.\n'
-    # robot_speak(response)
+    robot_speak(response)
     return response
 
 def robot_response(you, mode, model):
@@ -119,12 +120,14 @@ def robot_response(you, mode, model):
     if not keyword.empty:
         robot_brain = common_question(you)
         if robot_brain is not None:
-            #robot_speak(robot_brain)
+            robot_speak(robot_brain)
             return robot_brain
         else:
             return generate_response(you, mode, model)
     else:
         return generate_response(you, mode, model)
+
+
 
 @app.post("/ask/")
 async def ask_question(request: QuestionRequest):
@@ -154,6 +157,29 @@ async def speak_question(request: QuestionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 """
+save_dir = 'conversations'
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+
+@app.post("/save_conversation")
+def save_conversation_endpoint(request: Request):
+    try:
+        data = request.json()
+        conversation = data["conversation"]
+
+        file_name = f"conversation_{time.strftime('%Y%m%d_%H%M%S')}.json"
+        file_path = os.path.join(save_dir, file_name)
+
+        with open(file_path, "a") as f:
+            json.dump({"conversation": conversation}, f, indent=4)
+
+        return JSONResponse(content={"success": True})
+
+    except KeyError:
+        raise HTTPException(status_code=400, detail="Invalid request format")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.get("/models")
 async def get_models():
     return JSONResponse({"online_models": online_models, "offline_models": offline_models})

@@ -290,10 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     addMessage('Error: Could not get response.', 'bot');
                 }
-                saveConversation(); // Save the conversation when the page loads
+               // Save the conversation when the page loads
             } catch (error) {
                 addMessage('Error: ' + error.message, 'bot');
             }
+            saveConversation(); // Save the conversation after each message
         }
 
     });
@@ -305,6 +306,9 @@ function saveConversation() {
         updateHistoryDisplay();
         isNewChat = false; // Reset the flag
     }
+
+    //send request to save conversation to server
+    sendConversationToServer(currentConversation);
 }
 
 function updateHistoryDisplay() {
@@ -354,6 +358,33 @@ function newChat() {
     addMessage("Hello! How can I help you?", "bot");
     isNewChat = true; // It's a new chat
 }
+
+// Function to send the conversation to the server
+function sendConversationToServer(conversationData) {
+     fetch('/save_conversation', { // Replace '/save_conversation' with your server endpoint
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache' // Prevent caching
+        },
+        
+        body: JSON.stringify({ conversation: conversationData }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Conversation saved successfully on the server.');
+            // Optionally, display a success message to the user
+        } else {
+            console.error('Failed to save conversation on the server:', data.error);
+            // Optionally, display an error message to the user
+        }
+    })
+    .catch(error => {
+        console.error('Error sending conversation to server:', error);
+        // Optionally, display an error message to the user
+    });
+}
 /*
 sendButton.addEventListener('click', () => {
     const message = messageInput.value.trim();
@@ -369,10 +400,21 @@ sendButton.addEventListener('click', () => {
     }
 });
 */
+
 messageInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-        sendButton.click();
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      // Shift + Enter: Insert a newline character
+      event.preventDefault(); // Prevent default Enter behavior (form submission or similar)
+      const start = messageInput.selectionStart;
+      const end = messageInput.selectionEnd;
+      messageInput.value = messageInput.value.substring(0, start) + '\n' + messageInput.value.substring(end);
+      messageInput.selectionStart = messageInput.selectionEnd = start + 1; // Move cursor to the newline
+    } else {
+      // Just Enter: Simulate send button click
+      sendButton.click();
     }
+  }
 });
 
 setTimeout(() => {
