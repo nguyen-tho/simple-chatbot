@@ -162,23 +162,40 @@ if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
 @app.post("/save_conversation")
-def save_conversation_endpoint(request: Request):
+async def save_conversation_endpoint(request: Request):
     try:
-        data = request.json()
+        # Parse request data asynchronously
+        data = await request.json()
+        if "conversation" not in data:
+            raise HTTPException(status_code=400, detail="Missing conversation data")
+        
         conversation = data["conversation"]
+        if not isinstance(conversation, list):
+            raise HTTPException(status_code=400, detail="Invalid conversation format")
 
-        file_name = f"conversation_{time.strftime('%Y%m%d_%H%M%S')}.json"
+        # Ensure save directory exists
+        os.makedirs(save_dir, exist_ok=True)
+
+        # Generate unique filename with timestamp
+        timestamp = time.strftime('%Y%m%d_%H%M%S')
+        file_name = f"conversation_{timestamp}.json"
         file_path = os.path.join(save_dir, file_name)
 
-        with open(file_path, "a") as f:
-            json.dump({"conversation": conversation}, f, indent=4)
+        # Save conversation with proper JSON formatting
+        with open(file_path, "w") as f:
+            json.dump({
+                "timestamp": timestamp,
+                "conversation": conversation
+            }, f, indent=2)
 
-        return JSONResponse(content={"success": True})
+        return {"success": True, "message": "Conversation saved successfully"}
 
-    except KeyError:
-        raise HTTPException(status_code=400, detail="Invalid request format")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON data")
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"File system error: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
     
 @app.get("/models")
 async def get_models():
