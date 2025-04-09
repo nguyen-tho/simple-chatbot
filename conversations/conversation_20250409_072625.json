@@ -1,0 +1,25 @@
+{
+  "timestamp": "20250409_072625",
+  "conversation": [
+    {
+      "sender": "bot",
+      "message": "Hello! How can I help you?"
+    },
+    {
+      "sender": "user",
+      "message": " hello"
+    },
+    {
+      "sender": "bot",
+      "message": "Good morning"
+    },
+    {
+      "sender": "user",
+      "message": "bye\n"
+    },
+    {
+      "sender": "bot",
+      "message": "Good bye! It was nice talking to you!"
+    }
+  ]
+}
