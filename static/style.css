@@ -181,3 +181,15 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+/* Add this to your style.css */
+.recording {
+    background-color: #dc3545; /* A red color */
+    color: white;
+    animation: pulse 1s infinite alternate; /* Optional: add a pulsing animation */
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
