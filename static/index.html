@@ -1,52 +1,62 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>My Chatbot</title>
-<link rel="stylesheet" type="text/css" href="/static/style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta charset="UTF-8">
-<meta name="description" content="A simple chatbot interface.">
-<meta name="keywords" content="chatbot, AI, conversation, web app">
-<link rel="icon" href="/static/chatbot_icon.jpg" type="image/x-icon">
+    <title>My Chatbot</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="description" content="A simple chatbot interface.">
+    <meta name="keywords" content="chatbot, AI, conversation, web app">
+    <link rel="icon" href="/static/chatbot_icon.jpg" type="image/x-icon">
 </head>
+
 <body>
+    <div class="header">
+        <div id="settings-container">
+            <div>
+                <label for="mode-toggle">Online Mode:</label>
+                <label class="switch">
+                    <input type="checkbox" id="mode-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
 
-<div id="settings-container">
-    <div>
-        <label for="mode-toggle">Online Mode:</label>
-        <label class="switch">
-            <input type="checkbox" id="mode-toggle" checked>
-            <span class="slider round"></span>
-          </label>
+            </div>
+            <div>
+                <label for="model-select">Model:</label>
+                <select id="model-select">
+                    <option value="model1">Model 1</option>
+                    <option value="model2">Model 2</option>
+                    <option value="model3">Model 3</option>
+                </select>
+
+            </div>
+        </div>
+        <div id="login-container">
+            <button id="login-button">Login</button>
+        </div>
     </div>
-    <div>
-        <label for="model-select">Model:</label>
-        <select id="model-select">
-            <option value="model1">Model 1</option>
-            <option value="model2">Model 2</option>
-            <option value="model3">Model 3</option>
-        </select>
+
+    <div id="content-container">
+        <div id="history-container">
+            
+            <aside>
+                <button id="toggle-history-btn">...</button>
+                <h2>History</h2>
+                <button id="new-chat-button">New Chat</button>
+            </aside>
+        </div>
+
+        <div id="chat-container">
+        </div>
     </div>
-</div>
 
-<div id="content-container">
-    <div id="history-container">
-        <h2>History</h2>
-        <button id="new-chat-button">New Chat</button>
+    <div id="input-container">
+        <textarea type="text" id="message-input" placeholder="Ask something..."> </textarea>
+        <button id="clear-button">Clear</button>
+        <button id="send-button">Send</button>
     </div>
-
-    <div id="chat-container">
-    </div>
-</div>
-
-<div id="input-container">
-    <textarea type="text" id="message-input" placeholder="Ask something..."> </textarea>
-    <button id="upload-button">Upload</button>
-    <button id="record-button">Record</button> 
-    <button id="clear-button">Clear</button>
-    <button id="send-button">Send</button>
-</div>
-
-<script src="/static/scripts.js"></script>
+    <script src="/static/scripts.js"></script>
 </body>
+
 </html>

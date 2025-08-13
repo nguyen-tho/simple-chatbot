@@ -451,3 +451,87 @@ function ensureMarkedLoaded() {
 
 // Call ensureMarkedLoaded somewhere before addMessage is used.
 ensureMarkedLoaded();
+
+async function setupVoiceRecording(recordButtonId, textareaId) {
+    const recordButton = document.getElementById(recordButtonId);
+    const textarea = document.getElementById(textareaId);
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordButton.addEventListener('click', async () => {
+        if (recordButton.classList.contains('recording')) {
+            mediaRecorder.stop();
+            recordButton.textContent = 'Record';
+            recordButton.classList.remove('recording');
+        } else {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+                    // Send audio to FastAPI backend
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'temp/temp_audio.wav');
+
+                    const response = await fetch('/voice_record', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        textarea.value = result.recognized_text || 'Could not recognize speech.';
+                    } else {
+                        console.error('Error:', response.statusText);
+                        textarea.value = 'Error in speech recognition.';
+                    }
+                };
+
+                mediaRecorder.start();
+                recordButton.textContent = 'Stop Recording';
+                recordButton.classList.add('recording');
+
+            } catch (error) {
+                console.error('Microphone access denied:', error);
+                alert('Please allow microphone access.');
+            }
+        }
+    });
+}
+
+
+function clearMessageInput() {
+    const messageInput = document.getElementById('message-input');
+    const clearBtn = document.getElementById('clear-button');
+    clearBtn.addEventListener('click', () => {
+        messageInput.value = ''; // Clear the input field
+        messageInput.focus(); // Set focus back to the input field
+        console.log('Message input cleared and focused.');
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    setupVoiceRecording('record-button', 'message-input');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    clearMessageInput();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const historyContainer = document.getElementById('history-container');
+    const toggleButton = document.getElementById('toggle-history-btn');
+
+    toggleButton.addEventListener('click', function() {
+        historyContainer.classList.toggle('collapsed');
+    });
+});

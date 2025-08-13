@@ -17,6 +17,25 @@ body {
   border-right: 1px solid #ccc;
   overflow-y: auto;
   padding: 10px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+#history-container.collapsed {
+  width: 10%;
+}
+
+.history-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Ẩn các nút và tiêu đề khi container bị thu nhỏ */
+#history-container.collapsed h2,
+#history-container.collapsed #new-chat-button {
+  display: flex;
 }
 
 .history-item {
@@ -59,7 +78,7 @@ body {
 .bot-message {
   background-color: #e8e8e8;
   align-self: flex-start;
-  width: 100%; /* Make it full width */
+  width: calc(100% - 25%); /* Make it full width */
   box-sizing: border-box; /* Include padding and border in the width */
 }
 
@@ -70,7 +89,6 @@ body {
   width: calc(100% - 25%);
   margin-left: 20%;
 }
-
 #message-input {
   flex-grow: 1;
   padding: 8px;
@@ -79,7 +97,7 @@ body {
   margin-right: 10px;
 }
 
-#message-input::-webkit-input-placeholder { /* For Chrome, Safari, and Opera */
+#message-input::-webkit-input-placeholder {
   color: #999;
   font-style: italic;
 }
@@ -104,11 +122,16 @@ body {
   margin-bottom: 10px;
 }
 
-#settings-container {
+#login-container {
+  margin-left: auto;
+}
+
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  /* Thêm padding ngang */
   border-bottom: 1px solid #ccc;
 }
 
@@ -123,18 +146,16 @@ body {
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 3em;
+  height: 1.5em;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -150,30 +171,26 @@ body {
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 1em;
+  width: 1em;
+  left: 0.25em;
+  bottom: 0.25em;
   background-color: white;
-  -webkit-transition: .4s;
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196F3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+input:checked+.slider:before {
+  transform: translateX(1.5em);
 }
 
-/* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }
@@ -182,14 +199,40 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-/* Add this to your style.css */
 .recording {
-    background-color: #dc3545; /* A red color */
-    color: white;
-    animation: pulse 1s infinite alternate; /* Optional: add a pulsing animation */
+  background-color: #dc3545;
+  color: white;
+  animation: pulse 1s infinite alternate;
 }
 
 @keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.05);
+  }
+}
+
+#settings-container {
+    display: flex; /* Bật Flexbox để các phần tử con sắp xếp theo hàng ngang */
+    align-items: center; /* Căn giữa các phần tử con theo chiều dọc */
+    gap: 20px; /* Thêm khoảng cách giữa các phần tử */
+}
+
+#login-button {
+    margin-left: auto; /* Thuộc tính quan trọng để đẩy nút sang phải */
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#login-button:hover {
+  background-color: #0056b3;
 }
