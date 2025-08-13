@@ -1,0 +1,10 @@
+Question,Keyword,Command
+"What time is it","time","python modules/common.py date_time"
+"What day is today","today","python modules/common.py today"
+"How are you","how are you","python modules/common.py how_are_you"
+"Goodbye","Bye","python modules/common.py good_bye"
+"Hi","Hi","python modules/common.py greeting"
+"Hello","Hello","python modules/common.py greeting"
+"What's your name","name","python modules/common.py name"
+"Who are you","who","python modules/common.py name"
+
