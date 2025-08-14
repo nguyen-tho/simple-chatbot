@@ -4,18 +4,27 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="data_src/.env")
 openorca_model = os.getenv("OPEN_ORCA_PATH")
+llama2_model = os.getenv("LLAMA_2_PATH")
+
+def get_offline_model(model_name): #model name key
+    if model_name == "Open-Orca-7B":
+        return openorca_model
+    elif model_name == "Llama-2-13B":
+        return llama2_model
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
 
 # conda activate llama
 # https://github.com/abetlen/llama-cpp-python
-def get_llama_model(model_name = openorca_model):
+def activate_llama_model(model_name = openorca_model):
     # Load the LLaMA model
-    model = Llama(model_path= model_name,main_gpu=0,
+    model = Llama(model_path= model_name,main_gpu=1,
             n_gpu_layers=40, n_ctx=512)
     return model
 
-def llama_chat(prompt):
+def llama_chat(prompt, model):
  
-    llm = get_llama_model()
+    llm = activate_llama_model(model_name=model)
     out = llm.create_completion(f"""<|im_start|>system
     You are a helpful chatbot.
     <|im_end|>
