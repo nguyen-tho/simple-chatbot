@@ -1,23 +1,29 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import speech_recognition
+import speech_recognition as sr
 import pyttsx3
 import pandas as pd
 from subprocess import Popen, PIPE
 from rich.console import Console
 from rich.markdown import Markdown
-import google_api as api
-import index_cpp as llama
+
 import time
 import json
 from pathlib import Path
 import uvicorn
 import os
+
+from pydub import AudioSegment
+import io
+
+from modules import google_api as api
+from modules import llama
+
 app = FastAPI()
 
-robot_ear = speech_recognition.Recognizer()
+robot_ear = sr.Recognizer()
 robot_mouth = pyttsx3.init()
 
 # Serve static files (HTML, CSS, JS)
@@ -26,10 +32,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 class QuestionRequest(BaseModel):
     question: str
     mode: str  
-    model: str 
-    
+    model: str
+    timestamp: float
+    chat_id: str
 
-def load_models(model_data_file="api_key.json"):
+class ConversationSaveRequest(BaseModel):
+    chat_id: str
+    conversation: list
+
+def load_models(model_data_file="data_src/model.json"):
     try:
         with open(model_data_file, 'r') as f:
             model_data = json.load(f)
@@ -64,7 +75,7 @@ def print_markdown_terminal(markdown_string):
     console.print(md)
 
 def common_question(question):
-    data = pd.read_csv('common.csv')
+    data = pd.read_csv('data_src/common.csv')
     question = question.lower()
 
     direct_match = data[data['Question'].str.lower() == question]
@@ -92,6 +103,7 @@ def robot_speak(robot_brain):
 def generate_response(prompt, mode, model):
     response = 'OK, Please wait ...\n'
     robot_speak(response)
+    start_time = time.time()
 
     if mode == 'online' or mode == 'on':
         if model in online_models:
@@ -103,89 +115,112 @@ def generate_response(prompt, mode, model):
 
     elif mode == 'offline' or mode == 'off':
         if model in offline_models:
-            llama_model = llama.get_llama_model()
-            output = llama.llama_chat(prompt)
+            output = llama.llama_chat(prompt, model=llama.get_offline_model(model))
             response = llama.send_response(output)
         else:
             response = "Invalid offline model selected."
     else:
         response = 'Invalid mode. Please choose online or offline mode.\n'
+    
+    end_time = time.time()
+    response_time = end_time - start_time
+    
     robot_speak(response)
-    return response
+    return response, response_time
 
 def robot_response(you, mode, model):
-    data = pd.read_csv('common.csv')
+    data = pd.read_csv('data_src/common.csv')
     keyword = data[data['Keyword'].apply(lambda x: x.lower() in you)]
+    response_time = 0
 
     if not keyword.empty:
         robot_brain = common_question(you)
         if robot_brain is not None:
             robot_speak(robot_brain)
-            return robot_brain
+            return robot_brain, response_time
         else:
             return generate_response(you, mode, model)
     else:
         return generate_response(you, mode, model)
 
-
-
-@app.post("/ask/")
-async def ask_question(request: QuestionRequest):
-    try:
-        response = robot_response(request.question, request.mode, request.model)
-        return {"response": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-"""
-@app.post("/speak/")
-async def speak_question(request: QuestionRequest):
-    try:
-        robot_mouth.say("Please speak your question.")
-        robot_mouth.runAndWait()
-        with speech_recognition.Microphone() as mic:
-            print("Robot: I'm Listening\n", end='', flush=True)
-            audio = robot_ear.listen(mic)
-            print("Robot:...")
-        you = robot_ear.recognize_google_cloud(audio)
-        print("User: " + you)
-        response = robot_response(you, request.mode, request.model)
-        return {"response": response}
-    except speech_recognition.UnknownValueError:
-        return {"response": "Could not understand audio"}
-    except speech_recognition.RequestError as e:
-        return {"response": f"Could not request results from Google Cloud Speech Recognition service; {e}"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-"""
 save_dir = 'conversations'
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
-@app.post("/save_conversation")
-async def save_conversation_endpoint(request: Request):
+@app.post("/ask/")
+async def ask_question(request: QuestionRequest):
     try:
-        # Parse request data asynchronously
-        data = await request.json()
-        if "conversation" not in data:
-            raise HTTPException(status_code=400, detail="Missing conversation data")
+        response, response_time = robot_response(request.question, request.mode, request.model)
         
-        conversation = data["conversation"]
-        if not isinstance(conversation, list):
-            raise HTTPException(status_code=400, detail="Invalid conversation format")
+        file_path = os.path.join(save_dir, f"{request.chat_id}.json")
+        
+        conversation_data = []
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                conversation_data = data.get("conversation", [])
 
-        # Ensure save directory exists
-        os.makedirs(save_dir, exist_ok=True)
+        conversation_data.append({
+            "sender": "user",
+            "message": request.question,
+            "timestamp": request.timestamp,
+        })
+        
+        conversation_data.append({
+            "sender": "bot",
+            "message": response,
+            "timestamp": time.time(),
+            "response_time": response_time
+        })
+        
+        with open(file_path, "w") as f:
+            json.dump({"conversation": conversation_data}, f, indent=2)
 
-        # Generate unique filename with timestamp
-        timestamp = time.strftime('%Y%m%d_%H%M%S')
-        file_name = f"conversation_{timestamp}.json"
+        return {"response": response, "response_time": response_time}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/new_chat")
+async def new_chat():
+    timestamp = time.strftime('%Y%m%d_%H%M%S')
+    chat_id = f"conversation_{timestamp}"
+    return {"chat_id": chat_id}
+
+@app.get("/get_history")
+async def get_history():
+    """Returns a list of all saved conversation file names."""
+    try:
+        files = [f for f in os.listdir(save_dir) if f.endswith('.json')]
+        # sort file based on timestamp
+        files.sort(key=lambda x: os.path.getmtime(os.path.join(save_dir, x)), reverse=True)
+        return JSONResponse({"history": files})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/get_conversation/{chat_id}")
+async def get_conversation(chat_id: str):
+    """Returns the content of a specific conversation file."""
+    file_path = os.path.join(save_dir, f"{chat_id}.json")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    try:
+        with open(file_path, 'r') as f:
+            conversation_data = json.load(f)
+        return JSONResponse(conversation_data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/save_conversation")
+async def save_conversation_endpoint(request: ConversationSaveRequest):
+    try:
+        file_name = f"{request.chat_id}.json"
         file_path = os.path.join(save_dir, file_name)
 
-        # Save conversation with proper JSON formatting
         with open(file_path, "w") as f:
             json.dump({
-                "timestamp": timestamp,
-                "conversation": conversation
+                "chat_id": request.chat_id,
+                "conversation": request.conversation
             }, f, indent=2)
 
         return {"success": True, "message": "Conversation saved successfully"}
@@ -205,6 +240,38 @@ async def get_models():
 async def read_root():
     """Serves the index.html file."""
     return Path("static/index.html").read_text()
+
+@app.post("/voice_record")
+async def voice_record(file: UploadFile = File(...)):
+    recognizer = sr.Recognizer()
+    audio_data = await file.read()
+
+    audio_segment = AudioSegment.from_file(io.BytesIO(audio_data))
+    audio_segment.export("temp/temp_audio.wav", format="wav")
+
+    with sr.AudioFile("temp/temp_audio.wav") as source:
+        audio = recognizer.record(source)
+
+    try:
+        text = recognizer.recognize_google_cloud(audio)
+    except sr.UnknownValueError:
+        text = ""
+
+    return {"recognized_text": text}
+
+@app.delete("/delete_conversation/{chat_id}")
+async def delete_conversation(chat_id: str):
+    """Deletes a specific conversation file from the server."""
+    file_path = os.path.join(save_dir, f"{chat_id}.json")
+    print(f"Attempting to delete conversation file: {file_path}")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    try:
+        os.remove(file_path)
+        return {"success": True, "message": f"Conversation {chat_id} deleted successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete conversation: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=80)
