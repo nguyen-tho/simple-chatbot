@@ -1,141 +1,3 @@
-/*
-const historyContainer = document.getElementById('history-container');
-const chatContainer = document.getElementById('chat-container');
-const messageInput = document.getElementById('message-input');
-const sendButton = document.getElementById('send-button');
-const newChatButton = document.getElementById('new-chat-button');
-const modeToggle = document.getElementById('mode-toggle');
-const modelSelect = document.getElementById('model-select');
-
-let conversationHistory = [];
-let currentConversation = [];
-let onlineMode = true;
-let selectedModel = 'model1';
-let isNewChat = true; // Flag to track if it's a new chat
-
-modeToggle.addEventListener('change', () => {
-    onlineMode = modeToggle.checked;
-});
-
-modelSelect.addEventListener('change', () => {
-    selectedModel = modelSelect.value;
-});
-
-function addMessage(message, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', `${sender}-message`);
-    messageDiv.textContent = message;
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    currentConversation.push({ sender, message });
-}
-
-function getBotResponse(userMessage) {
-    if (onlineMode) {
-        console.log(`Online mode, model: ${selectedModel}`);
-        const responses = {
-            'hello': 'Hello from online mode!',
-            'how are you': 'I am doing well in the cloud!',
-            'what is your name': `I am online model ${selectedModel}.`,
-            'default': 'Online mode: I do not understand.'
-        };
-        const lowerUserMessage = userMessage.toLowerCase();
-        return responses[lowerUserMessage] || responses['default'];
-    } else {
-        console.log("Offline mode");
-        const responses = {
-            'hello': 'Hello from offline mode!',
-            'how are you': 'I am doing well locally!',
-            'what is your name': 'I am an offline chatbot.',
-            'default': 'Offline mode: I do not understand.'
-        };
-        const lowerUserMessage = userMessage.toLowerCase();
-        return responses[lowerUserMessage] || responses['default'];
-    }
-}
-
-function saveConversation() {
-    if (currentConversation.length > 0 && isNewChat) { // Only save if it's a new chat
-        conversationHistory.push(currentConversation);
-        updateHistoryDisplay();
-        isNewChat = false; // Reset the flag
-    }
-}
-
-function updateHistoryDisplay() {
-    historyContainer.innerHTML = '<h2>History</h2><button id="new-chat-button">New Chat</button>';
-    document.getElementById('new-chat-button').addEventListener('click', newChat);
-    conversationHistory.forEach((conversation, index) => {
-        const historyItem = document.createElement('div');
-        historyItem.classList.add('history-item');
-        historyItem.innerHTML = `<span>Conversation ${index + 1}</span><button class="delete-button" data-index="${index}">X</button>`;
-        historyItem.addEventListener('click', (event) => {
-            if (event.target.classList.contains('delete-button')) {
-                return;
-            }
-            loadConversation(index);
-        });
-        historyContainer.appendChild(historyItem);
-        const deleteButtons = document.querySelectorAll('.delete-button');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const indexToDelete = parseInt(event.target.dataset.index);
-                deleteConversation(indexToDelete);
-            });
-        });
-    });
-}
-
-function loadConversation(index) {
-    chatContainer.innerHTML = ''; // Clear the chat
-    currentConversation = conversationHistory[index].slice(); // Copy the conversation
-    conversationHistory[index].forEach(messageObj => {
-        addMessage(messageObj.message, messageObj.sender);
-    });
-    isNewChat = false; // It's not a new chat when loading a conversation
-}
-
-function deleteConversation(index) {
-    conversationHistory.splice(index, 1);
-    updateHistoryDisplay();
-    chatContainer.innerHTML = '';
-    currentConversation = [];
-    isNewChat = true; // Start a new chat after deleting
-}
-
-function newChat() {
-    chatContainer.innerHTML = '';
-    currentConversation = [];
-    addMessage("Hello! How can I help you?", "bot");
-    isNewChat = true; // It's a new chat
-}
-
-sendButton.addEventListener('click', () => {
-    const message = messageInput.value.trim();
-    if (message) {
-        addMessage(message, 'user');
-        messageInput.value = '';
-
-        setTimeout(() => {
-            const botResponse = getBotResponse(message);
-            addMessage(botResponse, 'bot');
-            saveConversation();
-        }, 500);
-    }
-});
-
-messageInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-        sendButton.click();
-    }
-});
-
-setTimeout(() => {
-    addMessage("Hello! How can I help you?", "bot");
-}, 200);
-
-newChatButton.addEventListener('click', newChat);
-*/// scripts.js
 // scripts.js
 const historyContainer = document.getElementById('history-container');
 const chatContainer = document.getElementById('chat-container');
@@ -145,11 +7,10 @@ const newChatButton = document.getElementById('new-chat-button');
 const modeToggle = document.getElementById('mode-toggle');
 const modelSelect = document.getElementById('model-select');
 
-let conversationHistory = [];
 let currentConversation = [];
 let onlineMode = false;
 let selectedModel = modelSelect.value;
-let isNewChat = true; // Flag to track if it's a new chat
+let currentChatId = null;
 
 async function checkInternetConnection() {
     try {
@@ -193,7 +54,6 @@ checkInternetConnection().then((isConnected) => {
 
 window.addEventListener('online', (event) => {
     console.log('You are now online.');
-    //If the toggle is already on, or if the toggle is off, but the user is trying to turn it on, do not alert.
     if (!modeToggle.checked) {
         alert('Internet connection restored. Online mode available.');
     }
@@ -207,17 +67,6 @@ window.addEventListener('offline', (event) => {
     }
 });
 
-/*
-function addMessage(message, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', `${sender}-message`);
-    messageDiv.textContent = message;
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    currentConversation.push({ sender, message });
-}
-*/
-
 document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
@@ -225,14 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeToggle = document.getElementById('mode-toggle');
     const modelSelect = document.getElementById('model-select');
     const newChatButton = document.getElementById('new-chat-button');
-    /*
-    function appendMessage(sender, message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.textContent = `${sender}: ${message}`;
-        chatContainer.appendChild(messageDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-    */
+    
     async function loadModels() {
         try {
             const response = await fetch('/models');
@@ -260,187 +102,259 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadModels();
     modeToggle.addEventListener('change', loadModels);
+    
+    // Add this call to fetch history when the page loads
+    fetchHistory();
 
     sendButton.addEventListener('click', async () => {
         const message = messageInput.value;
         if (message) {
-            addMessage(message, 'user');
+            const userTimestamp = Date.now();
+            addMessage(message, 'user', userTimestamp);
             messageInput.value = '';
 
             const mode = modeToggle.checked ? 'online' : 'offline';
             const model = modelSelect.value;
 
             try {
+                if (!currentChatId) {
+                    await newChat();
+                }
+
                 const response = await fetch('/ask/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ question: message, mode: mode, model: model }),
+                    body: JSON.stringify({ 
+                        question: message, 
+                        mode: mode, 
+                        model: model, 
+                        timestamp: userTimestamp,
+                        chat_id: currentChatId
+                    }),
                 });
 
                 if (response.ok) {
                     const data = await response.json();
                     const answer = data.response;
                     if (answer) {
-                        addMessage(answer, 'bot');
+                        const botTimestamp = Date.now();
+                        addMessage(answer, 'bot', botTimestamp);
                     } else {
-                        addMessage('Error: No answer received.', 'bot');
+                        addMessage('Error: No answer received.', 'bot', Date.now());
                     }
                 } else {
-                    addMessage('Error: Could not get response.', 'bot');
+                    addMessage('Error: Could not get response.', 'bot', Date.now());
                 }
-               // Save the conversation when the page loads
             } catch (error) {
-                addMessage('Error: ' + error.message, 'bot');
+                addMessage('Error: ' + error.message, 'bot', Date.now());
             }
-            saveConversation(); // Save the conversation after each message
+            sendConversationToServer(currentConversation);
         }
-
     });
-}
-);
-function saveConversation() {
-    if (currentConversation.length > 0 && isNewChat) { // Only save if it's a new chat
-        conversationHistory.push(currentConversation);
-        updateHistoryDisplay();
-        isNewChat = false; // Reset the flag
+});
+
+function addMessage(message, sender, timestamp) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', `${sender}-message`);
+
+    if (typeof marked === 'undefined') {
+        console.error("marked.js is not loaded. Please include it in your HTML.");
+        messageDiv.textContent = message;
+    } else {
+        messageDiv.innerHTML = marked.parse(message);
     }
 
-    //send request to save conversation to server
-    sendConversationToServer(currentConversation);
+    const timeString = new Date(timestamp).toLocaleTimeString();
+    const timestampSpan = document.createElement('span');
+    timestampSpan.classList.add('timestamp');
+    timestampSpan.textContent = ` (${timeString})`;
+    messageDiv.appendChild(timestampSpan);
+
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    currentConversation.push({ sender, message, timestamp });
 }
 
-function updateHistoryDisplay() {
-    historyContainer.innerHTML = '<h2>History</h2><button id="new-chat-button">New Chat</button>';
-    document.getElementById('new-chat-button').addEventListener('click', newChat);
-    conversationHistory.forEach((conversation, index) => {
+async function newChat() {
+    chatContainer.innerHTML = '';
+    currentConversation = [];
+    addMessage("Hello! How can I help you?", "bot", Date.now());
+
+    try {
+        const response = await fetch('/new_chat');
+        if (response.ok) {
+            const data = await response.json();
+            currentChatId = data.chat_id;
+            console.log("New chat created with ID:", currentChatId);
+            // Call fetchHistory() after creating a new chat to refresh the list
+            fetchHistory();
+        } else {
+            console.error('Failed to get new chat ID:', response.status);
+        }
+    } catch (error) {
+        console.error('Error getting new chat ID:', error);
+    }
+}
+
+// Function to fetch and display the list of saved conversations
+async function fetchHistory() {
+    try {
+        const response = await fetch('/get_history');
+        if (response.ok) {
+            const data = await response.json();
+            // Call the function to update the display with the fetched data
+            updateHistoryDisplay(data.history);
+        } else {
+            console.error('Failed to fetch history:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching history:', error);
+    }
+}
+
+
+// Updated function to display fetched history
+function updateHistoryDisplay(historyFiles) {
+    const historyList = document.getElementById('history-list');
+    
+    // Clear only the history list, not the whole container
+    historyList.innerHTML = ''; 
+
+    // Sort files in descending order based on their timestamp
+    historyFiles.sort((a, b) => {
+        const timestampA = parseInt(a.split('_')[1], 10);
+        const timestampB = parseInt(b.split('_')[1], 10);
+        return timestampB - timestampA;
+    });
+
+    historyFiles.forEach((fileName) => {
         const historyItem = document.createElement('div');
         historyItem.classList.add('history-item');
-        historyItem.innerHTML = `<span>Conversation ${index + 1}</span><button class="delete-button" data-index="${index}">X</button>`;
-        historyItem.addEventListener('click', (event) => {
-            if (event.target.classList.contains('delete-button')) {
-                return;
+        
+        // Remove file extension for display
+        const displayName = fileName.replace('.json', '');
+        historyItem.innerHTML = `<span>${displayName}</span><button class="delete-button" data-filename="${fileName}">❌</button>`;
+        
+        historyItem.querySelector('.delete-button').addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (confirm(`Are you sure you want to delete this conversation?`)) {
+                deleteConversation(fileName.replace('.json', ''));
             }
-            loadConversation(index);
         });
-        historyContainer.appendChild(historyItem);
-        const deleteButtons = document.querySelectorAll('.delete-button');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const indexToDelete = parseInt(event.target.dataset.index);
-                deleteConversation(indexToDelete);
+        
+        historyItem.addEventListener('click', (event) => {
+            loadConversation(fileName.replace('.json', ''));
+        });
+        
+        // Append the item to the new history-list div
+        historyList.appendChild(historyItem);
+    });
+    
+    // Event listeners for the buttons in the aside tag
+    document.getElementById('new-chat-button').addEventListener('click', newChat);
+    const toggleButton = document.getElementById('toggle-history-btn');
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            document.getElementById('history-container').classList.toggle('collapsed');
+        });
+    }
+}
+
+// New function to handle conversation deletion
+async function deleteConversation(chatId) {
+    try {
+        const response = await fetch(`/delete_conversation/${chatId}`, {
+            method: 'DELETE',
+        });
+        
+        if (response.ok) {
+            console.log(`Conversation ${chatId} deleted successfully.`);
+            // After deletion, re-fetch the history to update the display
+            fetchHistory();
+        } else {
+            const errorData = await response.json();
+            console.error('Failed to delete conversation:', errorData.detail);
+            alert('Failed to delete conversation.');
+        }
+    } catch (error) {
+        console.error('Error deleting conversation:', error);
+        alert('An error occurred while deleting the conversation.');
+    }
+}
+
+// Updated function to load a specific conversation by ID
+async function loadConversation(chatId) {
+    chatContainer.innerHTML = '';
+    currentConversation = [];
+    currentChatId = chatId; // Set the current chat ID to the loaded one
+
+    try {
+        const response = await fetch(`/get_conversation/${chatId}`);
+        if (response.ok) {
+            const data = await response.json();
+            const conversation = data.conversation;
+            conversation.forEach(messageObj => {
+                addMessage(messageObj.message, messageObj.sender, messageObj.timestamp);
             });
-        });
-    });
+        } else {
+            console.error('Failed to load conversation:', response.status);
+            addMessage('Error: Could not load conversation.', 'bot', Date.now());
+        }
+    } catch (error) {
+        console.error('Error loading conversation:', error);
+        addMessage('Error: ' + error.message, 'bot', Date.now());
+    }
 }
 
-function loadConversation(index) {
-    chatContainer.innerHTML = ''; // Clear the chat
-    currentConversation = conversationHistory[index].slice(); // Copy the conversation
-    conversationHistory[index].forEach(messageObj => {
-        addMessage(messageObj.message, messageObj.sender);
-    });
-    isNewChat = false; // It's not a new chat when loading a conversation
-}
-
-function deleteConversation(index) {
-    conversationHistory.splice(index, 1);
-    updateHistoryDisplay();
-    chatContainer.innerHTML = '';
-    currentConversation = [];
-    isNewChat = true; // Start a new chat after deleting
-}
-
-function newChat() {
-    chatContainer.innerHTML = '';
-    currentConversation = [];
-    addMessage("Hello! How can I help you?", "bot");
-    isNewChat = true; // It's a new chat
-}
-
-// Function to send the conversation to the server
 function sendConversationToServer(conversationData) {
-     fetch('/save_conversation', { // Replace '/save_conversation' with your server endpoint
+     if (!currentChatId) {
+        console.error("Cannot save conversation, no chat ID exists.");
+        return;
+    }
+
+    fetch('/save_conversation', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache' // Prevent caching
+            'Cache-Control': 'no-cache'
         },
-        
-        body: JSON.stringify({ conversation: conversationData }),
+        body: JSON.stringify({ chat_id: currentChatId, conversation: conversationData }),
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             console.log('Conversation saved successfully on the server.');
-            // Optionally, display a success message to the user
         } else {
             console.error('Failed to save conversation on the server:', data.error);
-            // Optionally, display an error message to the user
         }
     })
     .catch(error => {
         console.error('Error sending conversation to server:', error);
-        // Optionally, display an error message to the user
     });
 }
-/*
-sendButton.addEventListener('click', () => {
-    const message = messageInput.value.trim();
-    if (message) {
-        addMessage(message, 'user');
-        messageInput.value = '';
-
-        setTimeout(() => {
-            const botResponse = getBotResponse(message);
-            addMessage(botResponse, 'bot');
-            saveConversation();
-        }, 500);
-    }
-});
-*/
 
 messageInput.addEventListener('keypress', (event) => {
   if (event.key === 'Enter') {
     if (event.shiftKey) {
-      // Shift + Enter: Insert a newline character
-      event.preventDefault(); // Prevent default Enter behavior (form submission or similar)
+      event.preventDefault();
       const start = messageInput.selectionStart;
       const end = messageInput.selectionEnd;
       messageInput.value = messageInput.value.substring(0, start) + '\n' + messageInput.value.substring(end);
-      messageInput.selectionStart = messageInput.selectionEnd = start + 1; // Move cursor to the newline
+      messageInput.selectionStart = messageInput.selectionEnd = start + 1;
     } else {
-      // Just Enter: Simulate send button click
       sendButton.click();
     }
   }
 });
 
 setTimeout(() => {
-    addMessage("Hello! How can I help you?", "bot");
+    newChat();
 }, 200);
 
 newChatButton.addEventListener('click', newChat);
 
-function addMessage(message, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', `${sender}-message`);
-
-    // Check if marked is available
-    if (typeof marked === 'undefined') {
-        console.error("marked.js is not loaded. Please include it in your HTML.");
-        messageDiv.textContent = message; // Fallback to plain text
-    } else {
-        messageDiv.innerHTML = marked.parse(message); // Render Markdown
-    }
-
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    currentConversation.push({ sender, message });
-}
-
-// Ensure marked.js is loaded (if not already)
 function ensureMarkedLoaded() {
     if (typeof marked === 'undefined') {
         const script = document.createElement('script');
@@ -449,9 +363,8 @@ function ensureMarkedLoaded() {
     }
 }
 
-// Call ensureMarkedLoaded somewhere before addMessage is used.
 ensureMarkedLoaded();
-
+/*
 async function setupVoiceRecording(recordButtonId, textareaId) {
     const recordButton = document.getElementById(recordButtonId);
     const textarea = document.getElementById(textareaId);
@@ -478,8 +391,6 @@ async function setupVoiceRecording(recordButtonId, textareaId) {
 
                 mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-
-                    // Send audio to FastAPI backend
                     const formData = new FormData();
                     formData.append('file', audioBlob, 'temp/temp_audio.wav');
 
@@ -508,8 +419,7 @@ async function setupVoiceRecording(recordButtonId, textareaId) {
         }
     });
 }
-
-
+*/
 function clearMessageInput() {
     const messageInput = document.getElementById('message-input');
     const clearBtn = document.getElementById('clear-button');
@@ -527,11 +437,14 @@ document.addEventListener('DOMContentLoaded', () => {
     clearMessageInput();
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+/*
+document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.getElementById('history-container');
     const toggleButton = document.getElementById('toggle-history-btn');
 
-    toggleButton.addEventListener('click', function() {
+    toggleButton.addEventListener('click', () => {
+        console.log('Toggle history button clicked');
         historyContainer.classList.toggle('collapsed');
     });
 });
+*/
