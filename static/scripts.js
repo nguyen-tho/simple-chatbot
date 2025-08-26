@@ -6,6 +6,7 @@ const sendButton = document.getElementById('send-button');
 const newChatButton = document.getElementById('new-chat-button');
 const modeToggle = document.getElementById('mode-toggle');
 const modelSelect = document.getElementById('model-select');
+const modeLabel = document.getElementById('mode-label');
 
 let currentConversation = [];
 let onlineMode = false;
@@ -29,13 +30,16 @@ modeToggle.addEventListener('change', async () => {
         const isConnected = await checkInternetConnection();
         if (isConnected) {
             onlineMode = true;
+            //alert('Online mode enabled.');
             console.log('Online mode enabled.');
         } else {
             modeToggle.checked = false;
+            //console.warn('Internet connection is required for online mode.');
             alert('Internet connection is required for online mode.');
         }
     } else {
         onlineMode = false;
+        //alert('Offline mode enabled.');
         console.log('Offline mode enabled.');
     }
 });
@@ -175,6 +179,8 @@ function addMessage(message, sender, timestamp) {
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
     currentConversation.push({ sender, message, timestamp });
+
+    updateUI();
 }
 
 async function newChat() {
@@ -196,6 +202,7 @@ async function newChat() {
     } catch (error) {
         console.error('Error getting new chat ID:', error);
     }
+    updateUI();
 }
 
 // Function to fetch and display the list of saved conversations
@@ -251,7 +258,6 @@ function updateHistoryDisplay(historyFiles) {
         // Append the item to the new history-list div
         historyList.appendChild(historyItem);
     });
-    
     // Event listeners for the buttons in the aside tag
     document.getElementById('new-chat-button').addEventListener('click', newChat);
     const toggleButton = document.getElementById('toggle-history-btn');
@@ -306,6 +312,7 @@ async function loadConversation(chatId) {
         console.error('Error loading conversation:', error);
         addMessage('Error: ' + error.message, 'bot', Date.now());
     }
+    updateUI();
 }
 
 function sendConversationToServer(conversationData) {
@@ -437,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearMessageInput();
 });
 
-/*
+
 document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.getElementById('history-container');
     const toggleButton = document.getElementById('toggle-history-btn');
@@ -447,4 +454,40 @@ document.addEventListener('DOMContentLoaded', () => {
         historyContainer.classList.toggle('collapsed');
     });
 });
-*/
+
+
+// Hàm kiểm tra tràn nội dung trong history-list và chat-container
+function checkOverflowStatus() {
+    const historyList = document.getElementById('history-list');
+    const chatContainer = document.getElementById('chat-container');
+
+    // 1. Kiểm tra số lượng cuộc hội thoại trong history-list
+    const historyItems = historyList.querySelectorAll('.history-item');
+    const isHistoryOverflow = historyItems.length >= 10;
+
+    // 2. Kiểm tra chiều cao nội dung trong chat-container
+    const contentHeight = chatContainer.scrollHeight;
+    const containerHeight = chatContainer.clientHeight;
+    const isChatOverflow = (contentHeight / containerHeight) > 0.5;
+
+    // Trả về một đối tượng chứa trạng thái của cả hai khu vực
+    return {
+        isHistoryOverflow: isHistoryOverflow,
+        isChatOverflow: isChatOverflow
+    };
+}
+
+// Ví dụ về cách sử dụng hàm này
+// Bạn có thể gọi hàm này sau khi thêm một tin nhắn mới hoặc một cuộc hội thoại mới
+function updateUI() {
+    const status = checkOverflowStatus();
+    console.log("Trạng thái History:", status.isHistoryOverflow ? "Đã tràn, cần cuộn" : "Bình thường");
+    console.log("Trạng thái Chat:", status.isChatOverflow ? "Đã tràn, cần cuộn" : "Bình thường");
+
+    // Dựa vào trạng thái, bạn có thể thực hiện các hành động khác
+    if (status.isChatOverflow) {
+        // Cuộn xuống cuối
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+}
+

@@ -1,24 +1,92 @@
-body {
-  font-family: sans-serif;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+body,
+html {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  /*overflow: hidden;*/
+  /* Prevent page scroll */
+  font-family: sans-serif;
+  /*
+    display: flex;
+    flex-direction: column;
+    */
+}
+
+.header {
+  display: flex;
+  /* Giữ lại Flexbox bên trong header để căn chỉnh */
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  /* Tăng z-index để chắc chắn nó nằm trên cùng */
+  background-color: white;
 }
 
 #content-container {
+  position: absolute;
+  top: 60px;
+  /* Bắt đầu từ dưới setting container */
+  bottom: 70px;
+  /* Kết thúc ở trên input container */
+  left: 0;
+  right: 0;
+  /* Cho phép cuộn nội dung bên trong */
   display: flex;
-  flex-grow: 1;
+  /* Giữ lại Flexbox để chia history và chat */
 }
 
 #history-container {
   width: 20%;
   background-color: #f0f0f0;
   border-right: 1px solid #ccc;
-  overflow-y: auto;
   padding: 10px;
   transition: width 0.3s ease;
-  overflow: hidden;
+  display: flex;
+  /* Make it a flex container */
+  flex-direction: column;
+  /* Stack children vertically */
+  height: 100%;
+  /* Or a fixed height */
+}
+
+#history-list {
+  flex-grow: 1; /* Allows the list to take up available space */
+  overflow-y: auto; /* Enables vertical scrolling when content exceeds container height */
+  padding-top: 10px;
+}
+
+#chat-container {
+  flex-grow: 1; /* Allows the chat box to expand and fill space */
+  padding: 20px;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Adds a vertical scrollbar when content overflows */
+}
+
+#input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  position: fixed;
+  /* Fix input container position */
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 25%);
+  z-index: 1000;
+  /* Ensure input container is on top of other content */
+  background-color: white;
+  /* Add background to avoid transparency issues */
+  box-sizing: border-box;
+  /* Ensure padding doesn't affect width */
+  margin-left: 20%;
+  
 }
 
 #history-container.collapsed {
@@ -54,15 +122,6 @@ body {
   color: red;
 }
 
-#chat-container {
-  flex-grow: 1; /* Crucial: Allow chat container to expand */
-  overflow-y: auto;
-  padding: 20px;
-  background-color: #f8f8f8;
-  display: flex;
-  flex-direction: column;
-}
-
 .message {
   margin-bottom: 10px;
   padding: 10px;
@@ -78,17 +137,23 @@ body {
 .bot-message {
   background-color: #e8e8e8;
   align-self: flex-start;
-  width: calc(100% - 25%); /* Make it full width */
-  box-sizing: border-box; /* Include padding and border in the width */
+  width: calc(100% - 25%);
+  box-sizing: border-box;
 }
 
 #input-container {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  width: calc(100% - 25%);
-  margin-left: 20%;
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Đặt lại chiều rộng là 100% */
+    z-index: 1000;
+    background-color: white;
+    box-sizing: border-box;
 }
+
 #message-input {
   flex-grow: 1;
   padding: 8px;
@@ -101,7 +166,6 @@ body {
   color: #999;
   font-style: italic;
 }
-
 
 #send-button {
   padding: 8px 15px;
@@ -131,7 +195,6 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  /* Thêm padding ngang */
   border-bottom: 1px solid #ccc;
 }
 
@@ -216,21 +279,22 @@ input:checked+.slider:before {
 }
 
 #settings-container {
-    display: flex; /* Bật Flexbox để các phần tử con sắp xếp theo hàng ngang */
-    align-items: center; /* Căn giữa các phần tử con theo chiều dọc */
-    gap: 20px; /* Thêm khoảng cách giữa các phần tử */
+  position: fixed;
+  align-items: center;
+  z-index: 1000;
+  gap: 20px;
 }
 
 #login-button {
-    margin-left: auto; /* Thuộc tính quan trọng để đẩy nút sang phải */
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
+  margin-left: auto;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 #login-button:hover {
