@@ -6,8 +6,6 @@ import speech_recognition as sr
 import pyttsx3
 import pandas as pd
 from subprocess import Popen, PIPE
-from rich.console import Console
-from rich.markdown import Markdown
 
 import time
 import json
@@ -20,11 +18,9 @@ import io
 
 from modules import google_api as api
 from modules import llama
+from modules.robot import robot_speak
 
 app = FastAPI()
-
-robot_ear = sr.Recognizer()
-robot_mouth = pyttsx3.init()
 
 # Serve static files (HTML, CSS, JS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -69,10 +65,7 @@ def load_models(model_data_file="data_src/model.json"):
 
 online_models, offline_models = load_models()
 
-def print_markdown_terminal(markdown_string):
-    console = Console()
-    md = Markdown(markdown_string)
-    console.print(md)
+
 
 def common_question(question):
     data = pd.read_csv('data_src/common.csv')
@@ -93,12 +86,7 @@ def common_question(question):
         return str(output.decode("utf-8").strip())
     return None
 
-def robot_speak(robot_brain):
-    print("Robot:")
-    print_markdown_terminal(robot_brain)
-    robot_mouth.say(robot_brain)
-    robot_mouth.runAndWait()
-    return
+
 
 def generate_response(prompt, mode, model):
     response = 'OK, Please wait ...\n'
@@ -274,4 +262,4 @@ async def delete_conversation(chat_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete conversation: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=80)
+    uvicorn.run(app, host="127.0.0.1", port=8080)

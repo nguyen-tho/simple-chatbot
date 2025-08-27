@@ -2,28 +2,20 @@ import speech_recognition
 import pyttsx3
 #import gtts
 import os
-import google_api as api
+from modules import google_api as api
 from subprocess import PIPE, Popen
-import index_cpp as llama
-import subprocess
+from modules import llama
 import pandas as pd
 import time
 
-from rich.console import Console
-from rich.markdown import Markdown
-
-def print_markdown_terminal(markdown_string):
-    """Prints a Markdown string to the terminal using rich."""
-    console = Console()
-    md = Markdown(markdown_string)
-    console.print(md)
+from modules.robot import robot_speak
 
     
 robot_ear = speech_recognition.Recognizer()
 robot_mouth = pyttsx3.init()
 
 def common_question(question):
-    data = pd.read_csv('common.csv')
+    data = pd.read_csv('data_src/common.csv')
     question = question.lower()
 
     # Check if the question directly matches any row in the dataset
@@ -44,12 +36,6 @@ def common_question(question):
         output = process.communicate()[0]
         return str(output.decode("utf-8").strip())
     
-def robot_speak(robot_brain):
-    print("Robot:")
-    print_markdown_terminal(robot_brain) 
-    robot_mouth.say(robot_brain)
-    robot_mouth.runAndWait()
-    return
 
 def generate_response(prompt):
     mode = input('Choose mode: ')
@@ -70,7 +56,7 @@ def generate_response(prompt):
     robot_speak(response)
         
 def robot_response(you):
-    data = pd.read_csv('common.csv')
+    data = pd.read_csv('data_src/common.csv')
     keyword = data[data['Keyword'].apply(lambda x: x.lower() in you)]
 
     if not keyword.empty:# response common question in dataset
@@ -81,12 +67,12 @@ def robot_response(you):
  
 while True:
     # user can choose to type or speak
-    robot_speak("Do you want to type or speak?")
+    robot_speak("Do you want to type (t/1) or speak(s/2)?")
     choose = input("Type or Speak: ")
-    if choose == 'type':# user type
+    if choose == 'type' or choose == 't' or choose == '1':# user type
         you = input("Type your question: ")
         robot_response(you)
-    elif choose == 'speak':# user speak
+    elif choose == 'speak' or choose == 's' or choose == '2':# user speak
         robot_speak("Please speak your question.")
         robot_mouth.say("I'm Listening")
         robot_mouth.runAndWait()
@@ -123,6 +109,3 @@ while True:
         #if not people can ask something else
         robot_speak("Do you have any other questions?")
         continue
-    
-            
-                       
