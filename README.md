@@ -1,5 +1,5 @@
 # simple-chatbot
-A simple chatbot with Llama_cpp library and Mistral 7B Open Orca model
+A simple chatbot running in your local computer with Llama_cpp library and Mistral 7B Open Orca model
 
 New update for this voice chatbot:
 - Offline mode is Mistral 7B Open Orca model + Llama_cpp
