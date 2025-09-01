@@ -25,9 +25,9 @@ New update for this voice chatbot:
    ```sh
    pip install -r requirements.txt
    ```
-   create your Gemini API key and copy it to api_key.json at model Gemini:
+   list of models in model.json:
    ```sh
-   # api_key.json
+   # model.json
    # with online models you add your api key to "api_key" field
    {
     "online_model":
@@ -35,8 +35,6 @@ New update for this voice chatbot:
         {
             "model": "gemini-1.5-flash",
             "name": "Gemini 1.5 Flash",
-            "api_key": "" #your api key
-
         }
    ]
    #with offline models you need to download models file with .gguf format (you can download it on hugging face)
@@ -46,7 +44,6 @@ New update for this voice chatbot:
         {
             "model":"Open-Orca-7B",
             "name": "Open Orca 7B",
-            "path": "" #path to your .gguf file
         }
    ]
    ```
@@ -57,7 +54,7 @@ New update for this voice chatbot:
    ```
    Run API
    ```sh
-   #the API can run with localhost (127.0.0.1:80)
+   #the API can run with localhost (127.0.0.1:8080)
    #run app.py to run API
    python app.py
    ```
